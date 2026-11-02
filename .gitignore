@@ -4,3 +4,4 @@ downloads/
 toolchains/*/
 *.swp
 .vscode/settings.json.local
+.repo
