@@ -1,0 +1,28 @@
+# QEMU virt 平台 defconfig 增量（scripts/build_kernel.sh 在 make defconfig 后 merge）
+# 以 CONFIG 片段形式书写，与 configs/kernel/fragments/*.cfg 同语法
+
+# initramfs / cpio.gz rootfs
+CONFIG_BLK_DEV_INITRD=y
+CONFIG_RD_GZIP=y
+CONFIG_DEVTMPFS=y
+CONFIG_DEVTMPFS_MOUNT=y
+
+# PL011 串口（TF-A / U-Boot / Kernel 全链共用 UART0）
+CONFIG_SERIAL_AMBA_PL011=y
+CONFIG_SERIAL_AMBA_PL011_CONSOLE=y
+
+# virtio 设备（磁盘、网络）
+CONFIG_VIRTIO=y
+CONFIG_VIRTIO_PCI=y
+CONFIG_VIRTIO_BLK=y
+CONFIG_VIRTIO_NET=y
+CONFIG_VIRTIO_MMIO=y
+
+# 熵源（避免 getrandom 阻塞，见 spec §7.6）
+CONFIG_HW_RANDOM=y
+CONFIG_HW_RANDOM_VIRTIO=y
+
+# 9p 共享（trace 文件传回 host，见 spec §7.4）
+CONFIG_NET_9P=y
+CONFIG_NET_9P_VIRTIO=y
+CONFIG_9P_FS=y

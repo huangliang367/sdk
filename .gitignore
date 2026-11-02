@@ -1,0 +1,6 @@
+source/
+out/
+downloads/
+toolchains/*/
+*.swp
+.vscode/settings.json.local
