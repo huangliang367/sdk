@@ -5,3 +5,5 @@ toolchains/*/
 *.swp
 .vscode/settings.json.local
 .repo
+.sdk_product
+.ccache/
