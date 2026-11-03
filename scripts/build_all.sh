@@ -11,9 +11,9 @@ source "$SDK_ROOT/scripts/lib/common.sh"
 sdk_ensure_product
 
 STEPS=(
-    build_optee.sh
-    build_uboot.sh
     build_tf-a.sh
+    build_uboot.sh
+    build_optee.sh
     build_kernel.sh
     build_rootfs.sh
     pack_image.sh

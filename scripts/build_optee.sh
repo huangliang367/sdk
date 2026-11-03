@@ -22,7 +22,8 @@ case "$BUILD_VARIANT" in
 esac
 
 sdk_log "make -C source/optee/optee_os PLATFORM=$OPTEE_PLATFORM DEBUG=$OPTEE_DEBUG"
-make -C "$OPTEE_SRC" \
+# 屏蔽外部 ARCH（内核构建常 export ARCH=arm64，会覆盖 optee 的 ARCH ?= arm 默认值）
+env -u ARCH make -C "$OPTEE_SRC" \
     PLATFORM="$OPTEE_PLATFORM" \
     CROSS_COMPILE="$CROSS_COMPILE" \
     CROSS_COMPILE_CORE="$CROSS_COMPILE" \

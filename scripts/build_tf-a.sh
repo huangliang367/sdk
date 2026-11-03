@@ -9,11 +9,11 @@ source "$SDK_ROOT/scripts/lib/common.sh"
 
 sdk_ensure_product
 sdk_begin_log tf-a
-sdk_require_source source/arm-trusted-firmware
+sdk_require_source source/atf
 sdk_use_toolchain
 sdk_timer_start
 
-TFA_SRC="$SDK_ROOT/source/arm-trusted-firmware"
+TFA_SRC="$SDK_ROOT/source/atf"
 TFA_OUT="$SDK_OUT/tf-a"
 mkdir -p "$TFA_OUT"
 
@@ -46,7 +46,7 @@ else
     sdk_warn "缺 BL32 或 BL33（先跑 build_optee.sh / build_uboot.sh 可打包 FIP），仅构建 BL1/BL2/BL31"
 fi
 
-sdk_log "make -C source/arm-trusted-firmware PLAT=$TFA_PLAT DEBUG=$TFA_DEBUG LOG_LEVEL=$TFA_LOG_LEVEL ${TARGETS[*]}"
+sdk_log "make -C source/atf PLAT=$TFA_PLAT DEBUG=$TFA_DEBUG LOG_LEVEL=$TFA_LOG_LEVEL ${TARGETS[*]}"
 make -C "$TFA_SRC" \
     PLAT="$TFA_PLAT" ARCH=aarch64 \
     CROSS_COMPILE="$CROSS_COMPILE" \

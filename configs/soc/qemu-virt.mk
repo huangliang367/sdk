@@ -5,7 +5,8 @@ SOC_NAME        := qemu-virt
 ARCH            := arm64
 CROSS_COMPILE   := aarch64-none-linux-gnu-
 TFA_PLAT        := qemu
-OPTEE_PLATFORM  := vexpress-qemu_virt
+# OP-TEE ≥ 4.x：qemu_virt flavor 仅 32 位（cortex-a15），aarch64 用 qemu_armv8a
+OPTEE_PLATFORM  := vexpress-qemu_armv8a
 UBOOT_DEFCONFIG := qemu_arm64_defconfig
 KERNEL_DEFCONFIG:= defconfig
 CPU_CORES       := 4
