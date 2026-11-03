@@ -4,6 +4,12 @@
 #   lunch qemu_debug
 #
 # 也可带参数自动 lunch: source scripts/envsetup.sh qemu_debug
+#
+# 禁止直接执行：子 shell 里 export 的变量/函数不会保留到当前终端，必须 source。
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then
+    echo "错误: envsetup.sh 必须用 source 执行: source scripts/envsetup.sh" >&2
+    exit 1
+fi
 
 # shellcheck disable=SC1091
 source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"

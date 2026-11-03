@@ -2,6 +2,13 @@
 # 首次环境搭建：系统依赖、repo 工具、交叉工具链（见 spec §5.1）
 #   ./scripts/setup.sh
 # 跳过 apt（非 Debian 系或无权 sudo）: SKIP_APT=1 ./scripts/setup.sh
+#
+# 禁止 source：set -euo pipefail 会残留在调用方 shell 中，
+# 之后任何返回非零的命令（如 lunch 不存在的 product）都会直接退出交互 shell。
+if [ "${BASH_SOURCE[0]}" != "$0" ]; then
+    echo "错误: 请直接执行 ./scripts/setup.sh，不要 source" >&2
+    return 1
+fi
 set -euo pipefail
 
 SDK_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -75,15 +82,3 @@ else
     mkdir -p "$TC_INSTALL"
     tar -xJf "$TC_CACHE" -C "$TC_INSTALL" --strip-components=1
 fi
-
-# ---------------------------------------------------------------- 完成
-cat <<EOF
-
-== setup 完成 ==
-下一步:
-    source scripts/envsetup.sh
-    lunch qemu_debug
-    ./scripts/sync.sh
-    ./scripts/patch.sh apply
-    ./scripts/build_all.sh
-EOF

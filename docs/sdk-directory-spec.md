@@ -689,3 +689,16 @@ perfetto --txt -c sched.cfg -o /data/misc/perfetto-traces/sched.pb
 ---
 
 *文档版本：v1.0 · 适用基线：TF-A v2.14 / OP-TEE 4.5 / U-Boot v2025.01 / Linux 6.1 & 6.9*
+
+
+# ---------------------------------------------------------------- 完成
+cat <<EOF
+
+== setup 完成 ==
+下一步:
+    source scripts/envsetup.sh
+    lunch qemu_debug
+    ./scripts/sync.sh
+    ./scripts/patch.sh apply
+    ./scripts/build_all.sh
+EOF
