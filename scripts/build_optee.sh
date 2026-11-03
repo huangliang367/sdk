@@ -23,11 +23,13 @@ esac
 
 sdk_log "make -C source/optee/optee_os PLATFORM=$OPTEE_PLATFORM DEBUG=$OPTEE_DEBUG"
 # 屏蔽外部 ARCH（内核构建常 export ARCH=arm64，会覆盖 optee 的 ARCH ?= arm 默认值）
+# 只构建 arm64 TA 开发套件（SDK 仅带 aarch64 工具链，编不了 ta_arm32）
 env -u ARCH make -C "$OPTEE_SRC" \
     PLATFORM="$OPTEE_PLATFORM" \
     CROSS_COMPILE="$CROSS_COMPILE" \
     CROSS_COMPILE_CORE="$CROSS_COMPILE" \
     CFG_ARM64_core=y \
+    supported-ta-targets=ta_arm64 \
     DEBUG="$OPTEE_DEBUG" \
     CFG_TEE_CORE_LOG_LEVEL="$OPTEE_LOG_LEVEL" \
     -j"$(nproc)"
