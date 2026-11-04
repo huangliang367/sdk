@@ -26,8 +26,8 @@ sdk_log "make -C source/optee/optee_os PLATFORM=$OPTEE_PLATFORM DEBUG=$OPTEE_DEB
 # 只构建 arm64 TA 开发套件（SDK 仅带 aarch64 工具链，编不了 ta_arm32）
 env -u ARCH make -C "$OPTEE_SRC" \
     PLATFORM="$OPTEE_PLATFORM" \
+    CROSS_COMPILE64="$CROSS_COMPILE" \
     CROSS_COMPILE="$CROSS_COMPILE" \
-    CROSS_COMPILE_CORE="$CROSS_COMPILE" \
     CFG_ARM64_core=y \
     supported-ta-targets=ta_arm64 \
     DEBUG="$OPTEE_DEBUG" \

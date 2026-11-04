@@ -1,0 +1,9 @@
+{
+  // 让 clangd 用交叉 gcc 解析系统头文件（compile_commands.json 里的编译器是
+  // aarch64-none-linux-gnu-gcc；clangd 默认不信任非系统编译器，不加会导致索引时
+  // 找不到交叉工具链头文件）。optee 若曾用系统默认 aarch64-linux-gnu-gcc 构建，
+  // 其编译数据库引用该编译器，故一并加白
+  "clangd.arguments": [
+    "--query-driver=${workspaceFolder}/toolchains/aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-*,/bin/aarch64-linux-gnu-*"
+  ]
+}
