@@ -1,0 +1,20 @@
+diff --git a/core/arch/arm/plat-vexpress/platform_config.h b/core/arch/arm/plat-vexpress/platform_config.h
+index 95142e6..7141014 100644
+--- a/core/arch/arm/plat-vexpress/platform_config.h
++++ b/core/arch/arm/plat-vexpress/platform_config.h
+@@ -74,8 +74,15 @@
+ #define IT_UART1		40
+ #define IT_SEC_PHY_TIMER	29
+ 
++#if defined(CFG_CONSOLE_UART) && CFG_CONSOLE_UART == 0
++/* SDK 单板串口：控制台走 UART0（0x09000000，QEMU virt PL011，GIC SPI 1 → INTID 33） */
++#define CONSOLE_UART_BASE	UART0_BASE
++#define IT_CONSOLE_UART		33
++#else
++/* 上游默认：UART1（0x09040000），需配合 soc_term 等第二串口工具 */
+ #define CONSOLE_UART_BASE	UART1_BASE
+ #define IT_CONSOLE_UART		IT_UART1
++#endif
+ 
+ #else
+ #error "Unknown platform flavor"

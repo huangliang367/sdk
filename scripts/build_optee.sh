@@ -29,6 +29,9 @@ env -u ARCH make -C "$OPTEE_SRC" \
     CROSS_COMPILE64="$CROSS_COMPILE" \
     CROSS_COMPILE="$CROSS_COMPILE" \
     CFG_ARM64_core=y \
+    CFG_ARM_GICV3=y \
+    CFG_CONSOLE_UART="${OPTEE_CONSOLE_UART:-0}" \
+    CFG_CORE_ASLR=n \
     supported-ta-targets=ta_arm64 \
     DEBUG="$OPTEE_DEBUG" \
     CFG_TEE_CORE_LOG_LEVEL="$OPTEE_LOG_LEVEL" \
