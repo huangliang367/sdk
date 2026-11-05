@@ -5,5 +5,8 @@
   // 其编译数据库引用该编译器，故一并加白
   "clangd.arguments": [
     "--query-driver=${workspaceFolder}/toolchains/aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-*,/bin/aarch64-linux-gnu-*"
-  ]
+  ],
+  // 同时装了微软 C/C++ 插件时，禁止它的 IntelliSense，避免与 clangd 抢 C/C++
+  // 语言服务导致跳转失效（二者并存时以 cpptools 为默认，而它未配置 compileCommands）
+  "C_Cpp.intelliSenseEngine": "disabled"
 }

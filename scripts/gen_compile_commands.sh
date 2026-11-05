@@ -36,7 +36,29 @@ cc_count() { # <json>
     python3 -c 'import json,sys; print(len(json.load(open(sys.argv[1]))))' "$1" 2>/dev/null || echo 0
 }
 
+# 编译器名绝对路径化：内核/u-boot/optee 的 .cmd 记录的是裸工具链名
+# （aarch64-none-linux-gnu-gcc，依赖构建时 PATH），clangd 找不到该驱动会退回
+# 内置 proxy driver，导致 CreateTargetInfo 失败、无法索引。替换为绝对路径后
+# 配合 --query-driver 才能正确提取系统头文件
+cc_abs_compiler() { # <json>
+    python3 - "$1" "$SDK_ROOT/toolchains/${CROSS_COMPILE%-}/bin/${CROSS_COMPILE}gcc" <<'EOF'
+import json, sys
+path, real = sys.argv[1], sys.argv[2]
+name = real.rsplit("/", 1)[-1]
+db = json.load(open(path))
+n = 0
+for e in db:
+    if "arguments" in e and e["arguments"] and e["arguments"][0] == name:
+        e["arguments"][0] = real; n += 1
+    elif "command" in e and e["command"].split(" ", 1)[0] == name:
+        e["command"] = real + e["command"][len(name):]; n += 1
+json.dump(db, open(path, "w"))
+print(f"编译器路径化 {n} 条")
+EOF
+}
+
 check_result() { # <组件> <json 路径>
+    cc_abs_compiler "$2"
     local n
     n=$(cc_count "$2")
     if [ "$n" -eq 0 ]; then
