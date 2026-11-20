@@ -7,7 +7,7 @@ export CROSS_COMPILE=${SDK_ROOT}/toolchains/aarch64-none-linux-gnu/bin/aarch64-n
 
 export KDIR=${PWD}/../../source/linux
 
-obj-m += module.o
+obj-m += test.o
 
 all:
 	$(MAKE) -C $(KDIR) M=$(PWD) modules

@@ -26,7 +26,7 @@ mkdir -p "$BR_OUT" "$ROOTFS_OUT"
 sdk_log "make -C source/buildroot O=$BR_OUT qemu_aarch64_virt_defconfig"
 make -C "$BR_SRC" O="$BR_OUT" qemu_aarch64_virt_defconfig
 
-# 2. SDK 定制 fragment：板级 overlay、串口、cpio.gz 格式
+# 2. SDK 定制 fragment：板级 overlay、串口、cpio.gz 格式、SSH/SFTP
 OVERLAY_DIR="$SDK_ROOT/board/$BOARD_NAME/rootfs"
 cat >> "$BR_OUT/.config" <<EOF
 
@@ -35,6 +35,11 @@ BR2_ROOTFS_OVERLAY="$OVERLAY_DIR"
 BR2_TARGET_GENERIC_GETTY_PORT="ttyAMA0"
 BR2_TARGET_ROOTFS_CPIO=y
 BR2_TARGET_ROOTFS_CPIO_GZIP=y
+# openssh 服务端（sftp-server 随服务端安装），供 WSL 经 tap 直连（见 scripts/net_tap.sh）
+BR2_PACKAGE_OPENSSH=y
+BR2_PACKAGE_OPENSSH_SERVER=y
+# root 密码（本地调试环境，勿用于生产镜像）
+BR2_TARGET_GENERIC_ROOT_PASSWD="root"
 EOF
 if [ "${ENABLE_PERFETTO:-n}" = "y" ]; then
     echo "BR2_PACKAGE_PERFETTO=y" >> "$BR_OUT/.config"

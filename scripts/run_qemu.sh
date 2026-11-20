@@ -55,8 +55,17 @@ CMD=(
     -bios "$BIOS"
     -append "console=ttyAMA0,115200 earlycon loglevel=$KERN_LOGLEVEL"
     -serial mon:stdio
-    -netdev user,id=n0 -device virtio-net-device,netdev=n0
 )
+
+# 网络后端（见 scripts/net_tap.sh）：
+#   user（默认）QEMU 内置 NAT，guest 可出外网，但宿主无法 ping/直连 guest
+#   tap          WSL 经 tap0 与 guest 二层直连，可 ping / sftp 直连 guest IP
+case "${QEMU_NET:-user}" in
+    user) CMD+=( -netdev user,id=n0 ) ;;
+    tap)  CMD+=( -netdev tap,id=n0,ifname="${QEMU_TAP_IF:-tap0}",script=no,downscript=no ) ;;
+    *)    sdk_die "未知 QEMU_NET=${QEMU_NET}（可选: user|tap）" ;;
+esac
+CMD+=( -device virtio-net-device,netdev=n0 )
 [ -f "$KERNEL_IMG" ] && CMD+=( -kernel "$KERNEL_IMG" )
 [ -f "$INITRD" ]     && CMD+=( -initrd "$INITRD" )
 [ -n "$DTB" ]        && CMD+=( -dtb "$DTB" )

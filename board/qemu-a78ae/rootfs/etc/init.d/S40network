@@ -1,0 +1,17 @@
+#!/bin/sh
+# 网络初始化（覆盖 buildroot 默认 S40network）：
+#   1. 先 DHCP（QEMU user 模式下由 QEMU 内置 DHCP 分配 10.0.2.15）
+#   2. 失败则回退静态 IP（QEMU_NET=tap 模式，网段与 scripts/net_tap.sh 一致）
+case "${1:-start}" in
+start)
+    ifconfig lo 127.0.0.1 up
+    if udhcpc -i eth0 -t 3 -T 2 -n >/dev/null 2>&1; then
+        exit 0
+    fi
+    ifconfig eth0 192.168.76.2 netmask 255.255.255.0 up
+    route add default gw 192.168.76.1
+    ;;
+stop)
+    ifconfig eth0 down
+    ;;
+esac

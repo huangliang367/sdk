@@ -7,3 +7,17 @@ toolchains/*/
 .repo
 .sdk_product
 .ccache/
+*.symvers.cmd
+*.order.cmd
+*.ko.cmd
+*.mod.cmd
+*.mod.o.cmd
+*.o.cmd
+*.symbers
+modules.order
+*.ko
+*.mod
+*.mod.o
+*.o
+*.symvers
+*.mod.c

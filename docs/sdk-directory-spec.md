@@ -418,15 +418,16 @@ device-tree-compiler swig libgnutls28-dev uuid-dev
 等价于依次执行：
 
 ```bash
-build_tf-a.sh      # ① 产出 bl1.bin bl2.bin bl31.bin fip.bin
-build_optee.sh     # ② OP-TEE OS（依赖工具链；其产物被 TF-A 打包进 FIP）
-build_uboot.sh     # ③ U-Boot（BL33）
-build_kernel.sh    # ④ Image + DTB + modules
-build_rootfs.sh    # ⑤ buildroot/busybox → rootfs.cpio.gz
-pack_image.sh      # ⑥ 组装 QEMU 启动镜像
+build_uboot.sh     # ① U-Boot（BL33）
+build_tf-a.sh      # ② 产出 bl1.bin bl2.bin bl31.bin fip.bin（FIP 含 BL31 + BL33）
+build_kernel.sh    # ③ Image + DTB + modules
+build_rootfs.sh    # ④ buildroot/busybox → rootfs.cpio.gz（含 openssh 服务端）
+pack_image.sh      # ⑤ 组装 QEMU 启动镜像
 ```
 
-> 实际依赖顺序：OP-TEE 与 U-Boot 需在 TF-A 打 FIP 之前就绪，因此脚本内部顺序为 optee → u-boot → tf-a(FIP) → kernel → rootfs → pack。每个脚本可独立运行，日常迭代只跑受影响的环节。
+> 实际依赖顺序：U-Boot 需在 TF-A 打 FIP 之前就绪，因此脚本内部顺序为 u-boot → tf-a(FIP) → kernel → rootfs → pack。每个脚本可独立运行，日常迭代只跑受影响的环节。
+>
+> 当前构建流程不打包 OP-TEE（无 BL32、SPD=none）；`build_optee.sh` 仍保留，恢复时重新加入 `build_all.sh` 并还原 `build_tf-a.sh` 的 BL32/SPD=opteed 参数即可。
 
 ### 5.3 各组件构建要点
 
@@ -438,15 +439,11 @@ make -C source/arm-trusted-firmware \
     CROSS_COMPILE=aarch64-none-linux-gnu- \
     DEBUG=1 LOG_LEVEL=40 \
     BL33=$SDK_OUT/u-boot/u-boot.bin \
-    BL32=$SDK_OUT/optee/tee-header_v2.bin \
-    BL32_EXTRA1=$SDK_OUT/optee/tee-pager_v2.bin \
-    BL32_EXTRA2=$SDK_OUT/optee/tee-pageable_v2.bin \
-    SPD=opteed \
     QEMU_USE_GIC_DRIVER=QEMU_GICV3 \
     all fip
 ```
 
-产物拷贝至 `out/<product>/tf-a/`，FIP（含 BL2/BL31/BL32/BL33）由 `fiptool` 生成。
+产物拷贝至 `out/<product>/tf-a/`，FIP（含 BL2/BL31/BL33，不含 BL32）由 `fiptool` 生成。
 
 **OP-TEE（`scripts/build_optee.sh`）**
 
@@ -536,10 +533,23 @@ qemu-system-aarch64 \
     -initrd out/qemu_debug/rootfs/rootfs.cpio.gz \
     -append "console=ttyAMA0,115200 earlycon loglevel=8" \
     -serial mon:stdio \
-    -netdev user,id=n0 -device virtio-net-device,netdev=n0
+    -netdev user,id=n0 -device virtio-net-device,netdev=n0   # 或 tap 模式: -netdev tap,id=n0,ifname=tap0,script=no,downscript=no（见 §7.1.1）
 ```
 
-TF-A 启动链：`BL1(ROM) → BL2 → BL31(EL3 runtime) → BL32(OP-TEE) → BL33(U-Boot) → Linux`。
+TF-A 启动链：`BL1(ROM) → BL2 → BL31(EL3 runtime) → BL33(U-Boot) → Linux`（当前不打包 BL32/OP-TEE）。
+
+### 7.1.1 网络：WSL 直连 guest（ping / sftp）
+
+默认 `user` 模式（QEMU 内置 NAT）下 guest 可访问外网，但宿主无法 ping/直连 guest。需要 WSL 直连时用 tap 模式：
+
+```bash
+sudo scripts/net_tap.sh setup                 # 创建 tap0（192.168.76.1/24）
+QEMU_NET=tap ./scripts/run_qemu.sh            # guest eth0 回退静态 IP 192.168.76.2
+ping 192.168.76.2                             # ICMP 直连
+sftp root@192.168.76.2                        # 密码见 BR2_TARGET_GENERIC_ROOT_PASSWD（默认 root）
+```
+
+tap 网卡在 WSL 重启（`wsl --shutdown`）后需重新 `setup`。`user` 模式与 tap 模式由 guest 的 `S40network` 自动适配（先 DHCP，失败回退静态）。
 
 ### 7.2 QEMU + GDB
 

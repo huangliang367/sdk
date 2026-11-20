@@ -1,0 +1,4 @@
+# 允许 root 密码登录（本地调试环境，配合 BR2_TARGET_GENERIC_ROOT_PASSWD）
+PermitRootLogin yes
+PasswordAuthentication yes
+Subsystem sftp /usr/libexec/sftp-server
