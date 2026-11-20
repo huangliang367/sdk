@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # 构建 TF-A（BL1/BL2/BL31 + FIP），见 spec §5.3
-# 依赖 build_optee.sh / build_uboot.sh 的产物（BL32/BL33）；缺省时只构建 BL1/BL2/BL31
+# 依赖 build_uboot.sh 的产物（BL33）；缺省时只构建 BL1/BL2/BL31
+# 不打包 BL32（OP-TEE），FIP 仅含 BL31 + BL33
 set -euo pipefail
 
 SDK_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -24,26 +25,17 @@ case "$TFA_BUILD" in
     *) sdk_die "未知 TFA_BUILD=$TFA_BUILD（configs/product 应为 debug/release）" ;;
 esac
 
-# BL33(U-Boot) / BL32(OP-TEE) 就绪则打包进 FIP
+# BL33(U-Boot) 就绪则打包进 FIP（无 BL32/OP-TEE，不设 SPD）
 BL33="$SDK_OUT/u-boot/u-boot.bin"
-BL32_HEADER="$SDK_OUT/optee/tee-header_v2.bin"
-BL32_PAGER="$SDK_OUT/optee/tee-pager_v2.bin"
-BL32_PAGEABLE="$SDK_OUT/optee/tee-pageable_v2.bin"
 
 EXTRA_VARS=()
 TARGETS=(bl1 bl2 bl31)
-if [ -f "$BL33" ] && [ -f "$BL32_HEADER" ]; then
-    sdk_log "BL32/BL33 就绪，构建 all fip（SPD=opteed）"
-    EXTRA_VARS+=(
-        "BL33=$BL33"
-        "BL32=$BL32_HEADER"
-        "BL32_EXTRA1=$BL32_PAGER"
-        "BL32_EXTRA2=$BL32_PAGEABLE"
-        "SPD=opteed"
-    )
+if [ -f "$BL33" ]; then
+    sdk_log "BL33 就绪，构建 all fip（不含 OP-TEE）"
+    EXTRA_VARS+=( "BL33=$BL33" )
     TARGETS=(all fip)
 else
-    sdk_warn "缺 BL32 或 BL33（先跑 build_optee.sh / build_uboot.sh 可打包 FIP），仅构建 BL1/BL2/BL31"
+    sdk_warn "缺 BL33（先跑 build_uboot.sh 可打包 FIP），仅构建 BL1/BL2/BL31"
 fi
 
 sdk_log "make -C source/atf PLAT=$TFA_PLAT DEBUG=$TFA_DEBUG LOG_LEVEL=$TFA_LOG_LEVEL ${TARGETS[*]}"

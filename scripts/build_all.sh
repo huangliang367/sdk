@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 一键全量构建（spec §5.2）：
-#   optee → u-boot → tf-a(FIP) → kernel → rootfs → pack
+#   u-boot → tf-a(FIP) → kernel → rootfs → pack
 # 可独立运行的单组件脚本见 scripts/build_<component>.sh
 set -euo pipefail
 
@@ -11,9 +11,8 @@ source "$SDK_ROOT/scripts/lib/common.sh"
 sdk_ensure_product
 
 STEPS=(
-    build_tf-a.sh
     build_uboot.sh
-    build_optee.sh
+    build_tf-a.sh
     build_kernel.sh
     build_rootfs.sh
     pack_image.sh
